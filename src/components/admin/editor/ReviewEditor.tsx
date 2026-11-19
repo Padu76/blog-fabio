@@ -173,7 +173,7 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
     { ok: fields.rating !== null, text: 'Voto', todo: 'metti il voto', target: 'voto' },
     { ok: fields.excerpt.trim().length > 0, text: 'Estratto senza spoiler', todo: 'scrivi l’estratto', target: 'excerpt' },
     { ok: !fields.has_spoilers || fields.spoiler_body.trim().length > 0, text: 'Sezione spoiler (se attiva) compilata', todo: 'scrivi la parte con spoiler (o togli la spunta)', target: 'spoiler' },
-    { ok: Boolean(doc.edition?.cover_url) || doc.placeholder_ok || needPlaceholderOk, text: 'Copertina (o segnaposto accettato)', todo: 'carica la copertina, oppure spunta “Pubblica anche senza copertina”', target: 'senza-copertina' },
+    { ok: !doc.book || Boolean(doc.edition?.cover_url) || doc.placeholder_ok || needPlaceholderOk, text: 'Copertina (o segnaposto accettato)', todo: 'carica la copertina, oppure spunta “Pubblica anche senza copertina”', target: 'senza-copertina' },
   ];
   const missing = checklist.filter((c) => !c.ok);
   const ready = missing.length === 0;
