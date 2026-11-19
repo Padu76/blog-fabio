@@ -33,7 +33,7 @@ export default async function ArchivePage({ searchParams }: { searchParams: SP }
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div className="mx-auto max-w-7xl px-4 py-10">
       <h1 className="font-serif text-4xl text-ink">Recensioni</h1>
 
       <form id="cerca" method="get" action="/recensioni" role="search" className="mt-6 grid gap-3 rounded-xl border border-line bg-surface p-4 sm:grid-cols-[2fr_1fr_1fr_1fr_auto] sm:items-end">

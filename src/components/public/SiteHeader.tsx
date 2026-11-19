@@ -6,7 +6,7 @@ import type { Features } from '@/shared/settings';
 export function SiteHeader({ name, features }: { name: string; features: Features }) {
   return (
     <header className="border-b border-line bg-bg">
-      <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4 sm:py-5">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4">
         <Link href="/" className="flex min-w-0 items-center gap-2 text-accent-strong sm:gap-3">
           <BooksIcon className="h-8 w-8 shrink-0 sm:h-12 sm:w-12" />
           <span className="hidden h-10 w-px bg-ink/30 sm:block" aria-hidden="true" />

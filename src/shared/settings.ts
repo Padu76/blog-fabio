@@ -34,10 +34,10 @@ export const DEFAULT_SITE: SiteSettings = {
   name: 'Lo scaffale di Fabio',
   description: 'Recensioni e consigli di lettura di Fabio.',
   hero_title: 'Ogni libro ha una storia. Trova la tua.',
-  hero_subtitle: 'Letture, pensieri e consigli di Fabio.',
-  // foto iniziale (licenza Unsplash, link diretto come da linee guida): sostituibile dal pannello
-  hero_image_url: 'https://images.unsplash.com/photo-1513680592398-887abb03c760?ixlib=rb-4.1.0&q=80&fm=jpg&crop=entropy&cs=srgb&w=1800',
-  hero_image_credit: 'Foto: Jade Stephens su Unsplash (licenza Unsplash)',
+  hero_subtitle: 'Letture, pensieri e consigli di Fabio, libraio per passione.',
+  // illustrazione iniziale approvata da Andrea (ritaglio di docs/design/home-riferimento.png): sostituibile dal pannello
+  hero_image_url: `${(process.env.NEXT_PUBLIC_SITE_URL || 'https://blog-fabio.vercel.app').replace(/\/$/, '')}/hero-scaffale.jpg`,
+  hero_image_credit: null,
   bio_title: 'Chi sono',
   bio_text: '',
   bio_photo_url: null,
