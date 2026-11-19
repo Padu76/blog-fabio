@@ -4,10 +4,12 @@ import 'server-only';
 import { redirect } from 'next/navigation';
 import { createUserClient } from '@/lib/supabase/server';
 import { AppError } from '@/server/http';
+import { isSupabaseConfigured } from '@/lib/env';
 
 export type Operator = { userId: string; email: string; role: 'admin' | 'editor'; displayName: string | null };
 
 export async function getOperator(): Promise<{ operator: Operator | null; signedIn: boolean }> {
+  if (!isSupabaseConfigured()) return { operator: null, signedIn: false };
   const supabase = await createUserClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { operator: null, signedIn: false };
