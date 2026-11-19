@@ -1,0 +1,60 @@
+/* E:\blog-fabio\src\app\globals.css */
+@import "tailwindcss";
+
+:root {
+  --background: #F8F5EE;
+  --surface: #FFFDFA;
+  --accent: #7693A3;
+  --accent-soft: #DCE6EB;
+  --hero: #557587; /* carta da zucchero più profondo: testo bianco 4,8:1 (WCAG AA) */
+  --accent-strong: #345A6C;
+  --text: #233642;
+  --text-muted: #59636B;
+  --border: #D8D9D5;
+  --danger: #A33434;
+}
+
+@theme inline {
+  --color-bg: var(--background);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-hero: var(--hero);
+  --color-accent-strong: var(--accent-strong);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-line: var(--border);
+  --color-danger: var(--danger);
+  --font-serif: var(--font-serif-face), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-sans-face), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  background: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+::selection { background: var(--accent-soft); }
+
+:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.prose-review {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  line-height: 1.75;
+  max-width: 68ch;
+}
+.prose-review p + p { margin-top: 1.1em; }
+
+.smallcaps { font-variant: small-caps; letter-spacing: 0.06em; text-transform: lowercase; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
