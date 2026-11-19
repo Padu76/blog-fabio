@@ -68,6 +68,28 @@ export function SettingsForms({
     <>
       {msg && <p role={msg.kind === 'err' ? 'alert' : 'status'} className={`sticky top-14 z-20 rounded-lg p-3 text-sm ${msg.kind === 'err' ? 'border border-danger/40 bg-surface text-danger' : 'bg-accent-soft text-ink'}`}>{msg.text}</p>}
 
+      <section className={`space-y-3 rounded-xl border p-4 ${site.preview_mode ? 'border-accent-strong bg-accent-soft' : 'border-line bg-surface'}`}>
+        <h2 className="font-semibold text-ink">Chi vede il sito</h2>
+        <p className="text-ink">
+          {site.preview_mode
+            ? <>Il sito è <strong>in anteprima</strong>: lo vede solo chi è entrato nell’area riservata. I visitatori trovano la pagina “Lo scaffale si sta riempiendo”.</>
+            : <>Il sito è <strong>pubblico</strong>: chiunque abbia l’indirizzo può leggere le recensioni pubblicate.</>}
+        </p>
+        <button
+          type="button" disabled={saving}
+          onClick={() => {
+            if (site.preview_mode && !window.confirm('Rendere il sito pubblico? Da questo momento chiunque potrà leggere le recensioni pubblicate.')) return;
+            const n = { ...site, preview_mode: !site.preview_mode };
+            setSite(n);
+            void save({ site: n }, n.preview_mode ? 'Il sito ora è in anteprima.' : 'Il sito ora è pubblico.');
+          }}
+          className="rounded-lg bg-accent-strong px-5 py-2.5 font-medium text-white disabled:opacity-60"
+        >
+          {site.preview_mode ? 'Rendi il sito pubblico' : 'Rimetti il sito in anteprima'}
+        </button>
+        <p className="text-sm text-muted">Il cambio vale entro pochi secondi. In anteprima il sito non compare su Google.</p>
+      </section>
+
       <section className="space-y-4 rounded-xl border border-line bg-surface p-4">
         <h2 className="font-semibold text-ink">Sito</h2>
         <label className="block text-sm text-muted">Nome del sito<input value={site.name} onChange={set('name')} className={field} /></label>

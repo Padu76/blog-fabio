@@ -12,6 +12,8 @@ export const siteSettingsSchema = z.object({
   bio_text: z.string().max(8000).default(''),
   bio_photo_url: z.string().url().nullable().default(null),
   footer_note: z.string().trim().max(300).default(''),
+  // sito in anteprima: lo vedono solo gli operatori entrati, i visitatori trovano la pagina di attesa
+  preview_mode: z.boolean().default(false),
 });
 export type SiteSettings = z.infer<typeof siteSettingsSchema>;
 
@@ -42,6 +44,7 @@ export const DEFAULT_SITE: SiteSettings = {
   bio_text: '',
   bio_photo_url: null,
   footer_note: '',
+  preview_mode: false,
 };
 
 export const DEFAULT_FEATURES: Features = {

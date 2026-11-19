@@ -17,7 +17,8 @@ function checkMediaUrl(url: string | null) {
   if (!url) return;
   const allowed = `${publicEnv.supabaseUrl}/storage/v1/object/public/bfb-media/`;
   // ammessa anche la foto hero iniziale da Unsplash (licenza Unsplash, link diretto come da linee guida)
-  if (!url.startsWith(allowed) && !url.startsWith('https://images.unsplash.com/')) {
+  // ammessa anche l'illustrazione iniziale del sito
+  if (!url.startsWith(allowed) && !url.startsWith('https://images.unsplash.com/') && !url.endsWith('/hero-scaffale.jpg')) {
     throw new AppError('VALIDATION_ERROR', 'Le immagini vanno caricate dal pannello.');
   }
 }
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
     });
     revalidateTag(SETTINGS_TAG);
     revalidatePath('/', 'layout');
+    revalidatePath('/robots.txt');
     return ok({ saved: true });
   } catch (e) {
     return fail(e);

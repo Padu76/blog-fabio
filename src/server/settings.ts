@@ -30,6 +30,6 @@ export const getPublicSettings = unstable_cache(
       return { site: DEFAULT_SITE, features: DEFAULT_FEATURES };
     }
   },
-  ['bfb-public-settings-v2'],
+  ['bfb-public-settings-v3'],
   { tags: [SETTINGS_TAG], revalidate: 3600 },
 );

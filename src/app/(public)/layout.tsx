@@ -2,6 +2,7 @@
 import { SiteHeader } from '@/components/public/SiteHeader';
 import { SiteFooter } from '@/components/public/SiteFooter';
 import { getPublicSettings } from '@/server/settings';
+import { OperatorBar } from '@/components/public/OperatorBar';
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const { site, features } = await getPublicSettings();
@@ -10,6 +11,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <a href="#contenuto" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:bg-surface focus:p-2">
         Vai al contenuto
       </a>
+      <OperatorBar />
       <SiteHeader name={site.name} features={features} />
       <main id="contenuto">{children}</main>
       <SiteFooter name={site.name} note={site.footer_note} />
