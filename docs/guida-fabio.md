@@ -4,12 +4,16 @@
 
 ## Entrare
 
-1. Apri l’indirizzo del sito e aggiungi `/admin` (es. `https://blog-fabio.vercel.app/admin`).
-2. Scrivi la tua email e premi **Mandami il link**.
-3. Apri l’email **dallo stesso telefono** e tocca il link: sei dentro. Nessuna password.
+1. Apri l’indirizzo del sito (es. `https://blog-fabio.vercel.app`). Finché il sito è in anteprima vedi la pagina “Lo scaffale si sta riempiendo”: tocca **Area riservata**.
+2. Scrivi la **password** che ti ha dato Andrea e premi **Entra**. Non serve altro.
+3. Sei sul sito, e in alto compare una barra scura con i tuoi pulsanti: **+ Scrivi una recensione** e **Le mie recensioni**. Sulla pagina di una recensione compare anche **Modifica questa recensione**.
 4. Consiglio: dal menu di Chrome scegli **Aggiungi a schermata Home**. Avrai l’icona del sito come un’app.
 
-Se il link “non è più valido”, chiedine uno nuovo: ogni link si usa una volta sola e scade dopo un po’.
+Per cambiare la password: **Le mie recensioni → Il mio accesso**, scrivi quella nuova (almeno 8 caratteri) e salva.
+Se la dimentichi: nella pagina di accesso tocca **Non ricordi la password?** e fatti mandare un link via email, oppure chiedi ad Andrea di dartene una nuova.
+
+## Sito in anteprima
+Finché il sito è “in anteprima” lo vedi solo tu (e Andrea): puoi pubblicare le recensioni e guardare la tua libreria crescere senza che nessun altro la veda. Quando sarà il momento, Andrea lo renderà pubblico da Impostazioni.
 
 ## Nuova recensione: i quattro passi
 

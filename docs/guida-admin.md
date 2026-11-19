@@ -33,6 +33,7 @@ Dopo aver cambiato una variabile serve un nuovo deploy: Vercel → Deployments �
 1. Imposta `ADMIN_BOOTSTRAP_EMAIL` con la tua email e fai il redeploy.
 2. Apri `/admin`, inserisci quella email e usa il link ricevuto: diventi il primo amministratore. Il bootstrap funziona solo finché non esiste nessun operatore.
 3. Da **Impostazioni → Chi può entrare** aggiungi l’email di Fabio (ruolo *amministratore* se deve gestire anche le impostazioni).
+   Poi premi **Nuova password** accanto al suo nome: la password compare una sola volta, copiala e dagliela. Fabio entra con la sola password e può cambiarla da **Il mio accesso**. Nessuno può rileggerla: se la dimentica, **Nuova password** ne crea un’altra.
 4. Per togliere l’accesso a qualcuno: **Disattiva**.
 
 Gli utenti di Supabase Auth sono condivisi con gli altri progetti: un account esistente non entra nel blog se non è in `bfb_admins`.
@@ -40,6 +41,12 @@ Gli utenti di Supabase Auth sono condivisi con gli altri progetti: un account es
 **Supabase Auth: impostazioni da verificare una volta** (dashboard → Authentication):
 - *URL Configuration → Redirect URLs*: aggiungi `https://<dominio-del-sito>/auth/callback`. Senza questo, il link dell’email porta al sito sbagliato.
 - *Emails*: l’invio predefinito di Supabase ha limiti molto bassi e può consegnare solo agli indirizzi del team. Se il link non arriva a Fabio, serve un SMTP personalizzato già configurato per UtilityLab (gli altri progetti probabilmente lo usano già).
+
+## Sito in anteprima
+In **Impostazioni → Chi vede il sito** c’è l’interruttore. In anteprima i visitatori vedono solo la pagina “Lo scaffale si sta riempiendo”, il sito non compare su Google e solo chi è entrato vede le recensioni. **Rendi il sito pubblico** lo apre a tutti; il cambio vale entro pochi secondi.
+
+## Accesso con la sola password
+Per semplicità si entra con la sola password (senza email). È una scelta di comodità: la sicurezza dipende dalla password, quindi meglio lasciarne una lunga come quelle generate dal pannello. I tentativi sbagliati sono limitati (10 ogni quarto d’ora per connessione). Gli account sono quelli di Supabase Auth condivisi con UtilityLab: cambiare la password qui la cambia anche sugli altri siti per la stessa email.
 
 ## Errori comuni
 | Messaggio | Causa | Cosa fare |

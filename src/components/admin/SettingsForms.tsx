@@ -24,6 +24,18 @@ export function SettingsForms({
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [newOp, setNewOp] = useState({ email: '', role: 'admin', display_name: '' });
+  const [issued, setIssued] = useState<{ email: string; password: string } | null>(null);
+
+  async function newPassword(o: Op) {
+    if (!window.confirm(`Creare una nuova password per ${o.email}? Quella di prima smette di funzionare.`)) return;
+    setMsg(null); setIssued(null);
+    try {
+      const r = await api<{ password: string }>('/api/admin/operators', { method: 'POST', json: { action: 'set_password', user_id: o.user_id } });
+      setIssued({ email: o.email, password: r.password });
+    } catch (e) {
+      setMsg({ kind: 'err', text: e instanceof ApiFailure ? e.error.message : 'Errore.' });
+    }
+  }
 
   const field = 'mt-1 w-full rounded-lg border border-line bg-bg px-3 py-2.5 text-ink';
   const set = (k: keyof SiteSettings) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSite({ ...site, [k]: e.target.value });
@@ -162,14 +174,26 @@ export function SettingsForms({
             <li key={o.user_id} className="flex flex-wrap items-center gap-2 py-2">
               <span className="text-ink">{o.display_name ? `${o.display_name} · ` : ''}{o.email}</span>
               <span className="text-xs text-muted">{o.role === 'admin' ? 'amministratore' : 'editor'}{o.active ? '' : ' · disattivato'}</span>
-              {o.user_id !== me && (
-                <button type="button" onClick={() => void operator({ action: 'set_active', user_id: o.user_id, active: !o.active })} className="ml-auto text-xs text-accent-strong underline">
-                  {o.active ? 'Disattiva' : 'Riattiva'}
-                </button>
+              {o.user_id !== me ? (
+                <span className="ml-auto flex items-center gap-4">
+                  <button type="button" onClick={() => void newPassword(o)} className="text-xs text-accent-strong underline">Nuova password</button>
+                  <button type="button" onClick={() => void operator({ action: 'set_active', user_id: o.user_id, active: !o.active })} className="text-xs text-accent-strong underline">
+                    {o.active ? 'Disattiva' : 'Riattiva'}
+                  </button>
+                </span>
+              ) : (
+                <a href="/admin/accesso" className="ml-auto text-xs text-accent-strong underline">Cambia la mia password</a>
               )}
             </li>
           ))}
         </ul>
+        {issued && (
+          <div role="status" className="rounded-lg border border-accent-strong bg-accent-soft p-3 text-ink">
+            <p className="text-sm">Nuova password per <strong>{issued.email}</strong>. Copiala adesso: non verrà più mostrata.</p>
+            <p className="mt-2 select-all break-all font-mono text-xl">{issued.password}</p>
+            <p className="mt-2 text-sm text-muted">Una volta entrato, può cambiarla da “Il mio accesso”.</p>
+          </div>
+        )}
         <form onSubmit={(e) => { e.preventDefault(); void operator({ action: 'add', ...newOp }); }} className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
           <input required type="email" placeholder="email" value={newOp.email} onChange={(e) => setNewOp({ ...newOp, email: e.target.value })} className="rounded-lg border border-line bg-bg px-3 py-2.5" />
           <input placeholder="nome (facoltativo)" value={newOp.display_name} onChange={(e) => setNewOp({ ...newOp, display_name: e.target.value })} className="rounded-lg border border-line bg-bg px-3 py-2.5" />
@@ -178,7 +202,7 @@ export function SettingsForms({
           </select>
           <button className="rounded-lg bg-accent-strong px-4 py-2.5 text-white">Aggiungi</button>
         </form>
-        <p className="text-xs text-muted">Dopo averlo aggiunto, la persona entra dalla pagina di accesso con la propria email (link via email, nessuna password).</p>
+        <p className="text-xs text-muted">Dopo averlo aggiunto, premi “Nuova password” e comunicagliela: entra dalla pagina di accesso con la sola password, e può cambiarla da “Il mio accesso”. La password non è leggibile da nessuno: se la dimentica gliene crei un’altra.</p>
       </section>
     </>
   );

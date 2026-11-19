@@ -16,7 +16,8 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           <nav className="flex flex-1 items-center gap-1 overflow-x-auto text-sm">
             <Link href="/admin" className="rounded px-2 py-2 text-ink hover:bg-surface">Recensioni</Link>
             {op.role === 'admin' && <Link href="/admin/impostazioni" className="rounded px-2 py-2 text-ink hover:bg-surface">Impostazioni</Link>}
-            <Link href="/" target="_blank" className="rounded px-2 py-2 text-ink hover:bg-surface">Vedi il sito</Link>
+            <Link href="/" className="rounded px-2 py-2 text-ink hover:bg-surface">Vedi il sito</Link>
+            <Link href="/admin/accesso" className="whitespace-nowrap rounded px-2 py-2 text-ink hover:bg-surface">Il mio accesso</Link>
           </nav>
           <SignOutButton />
         </div>

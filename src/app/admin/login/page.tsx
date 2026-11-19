@@ -9,7 +9,7 @@ type SP = Promise<{ e?: string }>;
 export default async function LoginPage({ searchParams }: { searchParams: SP }) {
   const { e } = await searchParams;
   const { operator, signedIn } = await getOperator();
-  if (operator) redirect('/admin');
+  if (operator) redirect('/');
   const message = e === 'forbidden' || (signedIn && !operator)
     ? 'Questo account non è abilitato all’area riservata.'
     : e === 'link' ? 'Il link non è più valido o è già stato usato: chiedine uno nuovo.' : null;
@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: { searchParams: SP }) 
         <h1 className="font-serif text-3xl text-ink">Area riservata</h1>
       </div>
       <p className="mt-4 text-muted">
-        Scrivi la tua email: ti mandiamo un link per entrare, senza password. Aprilo dallo stesso telefono.
+        Scrivi la tua password per entrare.
       </p>
       {message && <p role="alert" className="mt-4 rounded-md border border-danger/40 bg-surface p-3 text-danger">{message}</p>}
       <LoginForm signedIn={signedIn} />

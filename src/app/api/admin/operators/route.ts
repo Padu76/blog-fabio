@@ -14,7 +14,16 @@ const schema = z.discriminatedUnion('action', [
     display_name: z.string().trim().max(80).optional(),
   }),
   z.object({ action: z.literal('set_active'), user_id: z.string().uuid(), active: z.boolean() }),
+  z.object({ action: z.literal('set_password'), user_id: z.string().uuid() }),
 ]);
+
+/** Password leggibile da dettare o copiare: 3 gruppi da 4, senza caratteri ambigui (0/O, 1/l/I). */
+function readablePassword() {
+  const alphabet = 'abcdefghjkmnpqrstuvwxyz23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  const chars = Array.from(bytes, (b) => alphabet[b % alphabet.length]);
+  return [chars.slice(0, 4), chars.slice(4, 8), chars.slice(8, 12)].map((g) => g.join('')).join('-');
+}
 
 async function findUserIdByEmail(svc: ReturnType<typeof createServiceClient>, email: string) {
   for (let page = 1; page <= 20; page++) {
@@ -44,6 +53,23 @@ export async function POST(req: Request) {
         target_type: 'operator', target_id: p.data.user_id,
       });
       return ok({ ok: true });
+    }
+
+    if (p.data.action === 'set_password') {
+      // solo per chi è operatore del blog: mai toccare altri utenti dell'istanza condivisa
+      const { data: target } = await svc.from('bfb_admins').select('user_id').eq('user_id', p.data.user_id).maybeSingle();
+      if (!target) throw new AppError('NOT_FOUND', 'Operatore non trovato.');
+      const password = readablePassword();
+      const { error } = await svc.auth.admin.updateUserById(p.data.user_id, { password });
+      if (error) {
+        console.error('nuova password', error.status, error.message);
+        throw new AppError('INTERNAL', 'Password non impostata. Riprova tra poco.', true);
+      }
+      await svc.from('bfb_audit_events').insert({
+        actor_id: operator.userId, action: 'operator.password_reset', target_type: 'operator', target_id: p.data.user_id,
+      });
+      // mostrata una sola volta a chi l'ha chiesta: non viene salvata in chiaro da nessuna parte
+      return ok({ ok: true, password });
     }
 
     const { email, role, display_name } = p.data;
