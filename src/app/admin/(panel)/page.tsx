@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { createUserClient } from '@/lib/supabase/server';
 import { formatRating } from '@/shared/review';
+import { Cover } from '@/components/Cover';
 
 type SP = Promise<{ q?: string; stato?: string }>;
 
@@ -63,6 +64,11 @@ export default async function Dashboard({ searchParams }: { searchParams: SP }) 
             <li key={r.id}>
               <Link href={`/admin/recensioni/${r.id}`} className="flex items-center gap-3 p-3 hover:bg-bg">
                 <span className="w-1.5 self-stretch rounded" style={{ background: r.state === 'published' ? '#345A6C' : r.state === 'draft' ? '#7693A3' : '#D8D9D5' }} aria-hidden="true" />
+                {b ? (
+                  <Cover url={e?.cover_url ?? null} title={b.title} authors={b.authors ?? []} className="w-14 text-[0.5rem] sm:w-16" />
+                ) : (
+                  <span className="flex aspect-[2/3] w-14 shrink-0 items-center justify-center rounded-sm border border-dashed border-line text-xs text-muted sm:w-16" aria-hidden="true">?</span>
+                )}
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-serif text-lg italic text-ink">{b?.title ?? 'Libro non ancora scelto'}</span>
                   <span className="block truncate text-sm text-muted">
