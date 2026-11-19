@@ -34,7 +34,7 @@ export default async function HomePage() {
               className="mt-7 flex max-w-xl overflow-hidden lg:mt-[2vw] lg:max-w-[min(39vw,46rem)] rounded-xl border-2 border-[#FBF6EC] bg-surface shadow-md">
               <label htmlFor="hero-q" className="sr-only">Cerca un libro tra le recensioni</label>
               <input
-                id="hero-q" name="q" type="search" placeholder="Di che libro hai bisogno oggi?"
+                id="hero-q" name="q" type="search" placeholder="Cerca un titolo o un autore"
                 className="min-w-0 flex-1 bg-transparent px-4 py-4 text-base text-ink placeholder:text-muted focus:outline-none sm:px-5 sm:text-xl"
               />
               <button type="submit" className="bg-accent-strong px-6 text-white transition-colors hover:bg-ink" aria-label="Cerca">
