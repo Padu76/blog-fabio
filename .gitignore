@@ -1,0 +1,60 @@
+# E:\blog-fabio\.gitignore
+
+# dipendenze
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# test
+/coverage
+/playwright-report
+/test-results
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# build
+/build
+/dist
+
+# ambiente e segreti
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# vercel
+.vercel
+
+# supabase locale
+supabase/.temp
+supabase/.branches
+
+# log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# file audio di prova locali
+/tmp-audio
+*.local.mp3
+*.local.m4a
+*.local.wav
+*.local.webm
