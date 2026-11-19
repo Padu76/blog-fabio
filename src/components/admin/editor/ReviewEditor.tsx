@@ -75,8 +75,24 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
     update('body', appendDictated(fieldsRef.current.body, spoken));
   }
 
+  // L'estratto segue da solo l'inizio della recensione finché Fabio non lo ritocca a mano (o lo detta).
+  const excerptAuto = useRef(!initial.fields.excerpt.trim() || initial.fields.excerpt === excerptFrom(initial.fields.body));
+
+  function onDictatedExcerpt(spoken: string) {
+    update('excerpt', appendDictated(fieldsRef.current.excerpt, spoken).slice(0, 600));
+  }
+
+  function goTo(id: string) {
+    const el = document.getElementById(id) ?? document.getElementById('sec-libro');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) el.focus({ preventScroll: true });
+  }
+
   function update<K extends keyof WorkingFields>(k: K, v: WorkingFields[K]) {
     const next = { ...fieldsRef.current, [k]: v };
+    if (k === 'excerpt') excerptAuto.current = !String(v).trim();
+    if (k === 'body' && excerptAuto.current) next.excerpt = excerptFrom(String(v));
     fieldsRef.current = next;
     setFields(next);
     saver.markChanged();
@@ -152,14 +168,15 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
   }
 
   const checklist = [
-    { ok: Boolean(doc.book), text: 'Libro scelto' },
-    { ok: fields.body.trim().length > 0, text: 'Testo della recensione' },
-    { ok: fields.rating !== null, text: 'Voto' },
-    { ok: fields.excerpt.trim().length > 0, text: 'Estratto senza spoiler' },
-    { ok: !fields.has_spoilers || fields.spoiler_body.trim().length > 0, text: 'Sezione spoiler (se attiva) compilata' },
-    { ok: Boolean(doc.edition?.cover_url) || doc.placeholder_ok || needPlaceholderOk, text: 'Copertina (o segnaposto accettato)' },
+    { ok: Boolean(doc.book), text: 'Libro scelto', todo: 'scegli il libro', target: 'sec-libro' },
+    { ok: fields.body.trim().length > 0, text: 'Testo della recensione', todo: 'scrivi o detta la recensione', target: 'body' },
+    { ok: fields.rating !== null, text: 'Voto', todo: 'metti il voto', target: 'voto' },
+    { ok: fields.excerpt.trim().length > 0, text: 'Estratto senza spoiler', todo: 'scrivi l’estratto', target: 'excerpt' },
+    { ok: !fields.has_spoilers || fields.spoiler_body.trim().length > 0, text: 'Sezione spoiler (se attiva) compilata', todo: 'scrivi la parte con spoiler (o togli la spunta)', target: 'spoiler' },
+    { ok: Boolean(doc.edition?.cover_url) || doc.placeholder_ok || needPlaceholderOk, text: 'Copertina (o segnaposto accettato)', todo: 'carica la copertina, oppure spunta “Pubblica anche senza copertina”', target: 'senza-copertina' },
   ];
-  const ready = checklist.every((c) => c.ok);
+  const missing = checklist.filter((c) => !c.ok);
+  const ready = missing.length === 0;
 
   async function publish() {
     if (publishing) return;
@@ -383,19 +400,21 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
       <section aria-labelledby="sec-completa" className="space-y-5 rounded-xl border border-line bg-surface p-4">
         <h2 id="sec-completa" className="text-sm font-semibold uppercase tracking-wide text-muted">3 · Completa</h2>
         <div>
-          <p className="mb-2 font-medium text-ink">Il tuo voto</p>
+          <p id="voto" className="mb-2 font-medium text-ink">Il tuo voto</p>
           <RatingPicker value={fields.rating} onChange={(v) => update('rating', v)} />
         </div>
         <div>
           <label htmlFor="excerpt" className="font-medium text-ink">Estratto (si vede nelle anteprime, senza spoiler)</label>
           <textarea id="excerpt" value={fields.excerpt} maxLength={600} onChange={(e) => update('excerpt', e.target.value)} lang="it"
             className="mt-1 min-h-24 w-full rounded-lg border border-line bg-bg p-3 font-serif text-[1.05rem] text-ink [field-sizing:content]" />
-          <div className="flex items-center gap-3 text-xs text-muted">
-            <button type="button" onClick={() => update('excerpt', excerptFrom(fields.body))} disabled={!fields.body.trim()} className="text-accent-strong underline disabled:opacity-50">
-              Prendi l’inizio del testo
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted">
+            <DictateButton onText={onDictatedExcerpt} />
+            <button type="button" onClick={() => { update('excerpt', excerptFrom(fields.body)); excerptAuto.current = true; }} disabled={!fields.body.trim()} className="text-accent-strong underline disabled:opacity-50">
+              Riprendi l’inizio della recensione
             </button>
-            <span className="ml-auto">{fields.excerpt.length}/600</span>
+            <span className="ml-auto text-xs">{fields.excerpt.length}/600</span>
           </div>
+          <p className="mt-1 text-xs text-muted">Si compila da solo con l’inizio della recensione. Puoi correggerlo, riscriverlo o dettarlo: da quel momento resta come lo hai lasciato tu.</p>
         </div>
         <div>
           <label htmlFor="tags" className="font-medium text-ink">Temi (facoltativi, separati da virgola)</label>
@@ -413,17 +432,38 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
       {/* 4. PUBBLICA */}
       <section aria-labelledby="sec-pubblica" className="rounded-xl border border-line bg-surface p-4">
         <h2 id="sec-pubblica" className="text-sm font-semibold uppercase tracking-wide text-muted">4 · Pubblica</h2>
-        <ul className="mt-3 space-y-1 text-sm">
-          {checklist.map((c) => (
-            <li key={c.text} className={c.ok ? 'text-ink' : 'text-muted'}>
-              <span aria-hidden="true" className={c.ok ? 'text-accent-strong' : 'text-danger'}>{c.ok ? '✓' : '○'}</span> {c.text}
-              <span className="sr-only">{c.ok ? ' (fatto)' : ' (manca)'}</span>
+        {ready ? (
+          <p role="status" className="mt-3 rounded-lg border border-accent-strong bg-accent-soft p-3 text-base font-medium text-ink">
+            <span aria-hidden="true">✓ </span>È tutto pronto: puoi pubblicare.
+          </p>
+        ) : (
+          <div role="status" className="mt-3 rounded-lg border-2 border-danger/60 bg-surface p-3">
+            <p className="text-base font-semibold text-ink">
+              Per pubblicare {missing.length === 1 ? 'manca ancora una cosa' : `mancano ancora ${missing.length} cose`}. Tocca per andarci:
+            </p>
+            <ul className="mt-2 space-y-2">
+              {missing.map((c) => (
+                <li key={c.text}>
+                  <button type="button" onClick={() => goTo(c.target)}
+                    className="flex min-h-11 w-full items-center gap-3 rounded-lg border border-line bg-bg px-3 py-2 text-left text-base text-ink hover:border-accent-strong">
+                    <span aria-hidden="true" className="text-xl text-danger">→</span>
+                    <span className="first-letter:uppercase">{c.todo}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          {checklist.filter((c) => c.ok).map((c) => (
+            <li key={c.text} className="text-muted">
+              <span aria-hidden="true" className="text-accent-strong">✓</span> {c.text}<span className="sr-only"> (fatto)</span>
             </li>
           ))}
         </ul>
         {doc.book && !doc.edition?.cover_url && !doc.placeholder_ok && (
           <label className="mt-3 flex items-center gap-3 text-sm text-ink">
-            <input type="checkbox" checked={needPlaceholderOk} onChange={(e) => setNeedPlaceholderOk(e.target.checked)} className="h-5 w-5 accent-[#345A6C]" />
+            <input id="senza-copertina" type="checkbox" checked={needPlaceholderOk} onChange={(e) => setNeedPlaceholderOk(e.target.checked)} className="h-5 w-5 accent-[#345A6C]" />
             Pubblica anche senza copertina (verrà mostrato un segnaposto con titolo e autore)
           </label>
         )}
