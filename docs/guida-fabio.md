@@ -5,7 +5,7 @@
 ## Entrare
 
 1. Apri l’indirizzo del sito (es. `https://blog-fabio.vercel.app`). Finché il sito è in anteprima vedi la pagina “Lo scaffale si sta riempiendo”: tocca **Area riservata**.
-2. Scrivi la **password** che ti ha dato Andrea e premi **Entra**. Non serve altro.
+2. Tocca **Entra con Google** e scegli il tuo account Google (quello con l’email che Andrea ha registrato). In alternativa scrivi la **password** che ti ha dato Andrea e premi **Entra**.
 3. Sei sul sito, e in alto compare una barra scura con i tuoi pulsanti: **+ Scrivi una recensione** e **Le mie recensioni**. Sulla pagina di una recensione compare anche **Modifica questa recensione**.
 4. Consiglio: dal menu di Chrome scegli **Aggiungi a schermata Home**. Avrai l’icona del sito come un’app.
 
@@ -27,8 +27,9 @@ Premi **+ Nuova recensione**. Puoi chiudere e riprendere quando vuoi: tutto si s
 - Puoi sempre **Cambia libro o edizione**.
 
 ### 2 · Racconta (dettatura)
-- Tocca il grande riquadro di testo e poi il **microfono sulla tastiera** (dettatura Google).
-- Puoi dire “virgola”, “punto”, “punto interrogativo”, “a capo”. Se non lo fai, va bene lo stesso: c’è il passo dopo.
+- Premi **Detta** sotto il riquadro di testo e parla con calma: la prima volta il telefono chiede il permesso per il microfono, tocca **Consenti**. Le parole compaiono mentre parli e si aggiungono in fondo. Premi **Ferma la dettatura** quando hai finito.
+- Puoi dire “virgola”, “a capo”, “punto a capo”, “punto interrogativo”, “punto esclamativo”, “due punti”. Il punto semplice non serve dirlo: lo mette il passo dopo.
+- Puoi sempre scrivere a mano, o alternare. Se il pulsante **Detta** non compare, usa il **microfono sulla tastiera** del telefono.
 - **Scrivi a tutto schermo** ti dà tutto lo spazio; **Fine** per tornare.
 - In alto vedi lo stato: **Salvato**, **Salvataggio…**, oppure **Connessione assente: salvato sul telefono**. Anche senza rete il testo resta sul telefono e si salva appena torna la connessione.
 
@@ -52,6 +53,10 @@ Se la correzione non funziona (servizio non raggiungibile o limite giornaliero),
 - Senza copertina puoi spuntare “Pubblica anche senza copertina” (comparirà un segnaposto con titolo e autore).
 - **Anteprima** ti mostra la pagina come la vedranno i lettori.
 - **Approva e pubblica**: la recensione è online. Viene pubblicata esattamente la versione che vedi.
+
+### Estratto e cosa manca
+- L’**estratto** (le poche righe che si vedono in home) si compila da solo con l’inizio della recensione. Puoi correggerlo, riscriverlo o dettarlo: da quel momento resta come lo hai lasciato tu.
+- Al passo **4 · Pubblica** un riquadro rosso ti dice cosa manca ancora (per esempio “Metti il voto”): toccando la riga vai al punto giusto. Quando compare “È tutto pronto” puoi premere **Approva e pubblica**.
 
 ## Dopo la pubblicazione
 - **Modificare**: apri la recensione, cambia quello che vuoi. Sul sito resta la versione già pubblicata finché non premi **Pubblica aggiornamento**.

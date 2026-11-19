@@ -45,6 +45,12 @@ Gli utenti di Supabase Auth sono condivisi con gli altri progetti: un account es
 ## Sito in anteprima
 In **Impostazioni → Chi vede il sito** c’è l’interruttore. In anteprima i visitatori vedono solo la pagina “Lo scaffale si sta riempiendo”, il sito non compare su Google e solo chi è entrato vede le recensioni. **Rendi il sito pubblico** lo apre a tutti; il cambio vale entro pochi secondi.
 
+## Accesso con Google
+Nella pagina di accesso c’è **Entra con Google**: è il modo consigliato per Fabio. Funziona solo se l’email dell’account Google è tra gli operatori (Impostazioni → Chi può entrare); qualunque altro account Google viene rimandato fuori. Usa il provider Google già configurato su Supabase per UtilityLab: non servono altre chiavi.
+
+## Dettatura
+Il pulsante **Detta** usa il riconoscimento vocale di Chrome (gratuito, serve internet): il sito non registra né salva audio, riceve solo il testo. La qualità dipende da Chrome. La trascrizione con OpenAI resta una funzione futura spenta (`FEATURE_AUDIO=false`).
+
 ## Accesso con la sola password
 Per semplicità si entra con la sola password (senza email). È una scelta di comodità: la sicurezza dipende dalla password, quindi meglio lasciarne una lunga come quelle generate dal pannello. I tentativi sbagliati sono limitati (10 ogni quarto d’ora per connessione). Gli account sono quelli di Supabase Auth condivisi con UtilityLab: cambiare la password qui la cambia anche sugli altri siti per la stessa email.
 
