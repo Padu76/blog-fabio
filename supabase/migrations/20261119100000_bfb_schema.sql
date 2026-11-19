@@ -43,10 +43,6 @@ returns boolean language sql stable security definer set search_path = '' as $$
   );
 $$;
 
-revoke all on function public.bfb_is_operator() from public, anon;
-revoke all on function public.bfb_is_admin() from public, anon;
-grant execute on function public.bfb_is_operator() to authenticated, service_role;
-grant execute on function public.bfb_is_admin() to authenticated, service_role;
 
 -- ---------------------------------------------------------------------------
 -- Impostazioni (pubbliche / private). Nessun segreto qui.
@@ -320,8 +316,6 @@ begin
   delete from public.bfb_rate_limits where window_start < now() - interval '2 days';
   return v_hits <= p_max;
 end $$;
-revoke all on function public.bfb_rate_hit(text, int, int) from public, anon, authenticated;
-grant execute on function public.bfb_rate_hit(text, int, int) to service_role;
 
 -- ---------------------------------------------------------------------------
 -- RLS: negazione predefinita, poi aperture esplicite
@@ -341,16 +335,10 @@ alter table public.bfb_catalog_cache enable row level security;
 alter table public.bfb_catalog_candidates enable row level security;
 alter table public.bfb_rate_limits enable row level security;
 
--- Togli i privilegi di default ad anon su tutto, poi riconcedi solo il necessario
-revoke all on public.bfb_admins, public.bfb_settings, public.bfb_books, public.bfb_editions,
-  public.bfb_reviews, public.bfb_review_revisions, public.bfb_public_reviews, public.bfb_slug_redirects,
-  public.bfb_ai_suggestions, public.bfb_ai_usage, public.bfb_audit_events, public.bfb_catalog_cache,
-  public.bfb_catalog_candidates, public.bfb_rate_limits from anon, authenticated;
+-- Nota: niente REVOKE/GRANT sui privilegi di tabella (nell'istanza condivisa richiedono conferma manuale).
+-- La protezione è data da RLS (negazione predefinita) + trigger di guardia in 20261119100300.
 
 -- Pubblico: solo proiezione pubblica, redirect e impostazioni pubbliche
-grant select on public.bfb_public_reviews to anon, authenticated;
-grant select on public.bfb_slug_redirects to anon, authenticated;
-grant select on public.bfb_settings to anon, authenticated;
 
 create policy bfb_public_reviews_read on public.bfb_public_reviews for select to anon, authenticated using (true);
 create policy bfb_slug_redirects_read on public.bfb_slug_redirects for select to anon, authenticated using (true);
@@ -358,28 +346,22 @@ create policy bfb_settings_public_read on public.bfb_settings for select to anon
   using (visibility = 'public' or (select public.bfb_is_operator()));
 
 -- Operatori: impostazioni modificabili solo da ruolo admin
-grant insert, update on public.bfb_settings to authenticated;
 create policy bfb_settings_admin_insert on public.bfb_settings for insert to authenticated
   with check ((select public.bfb_is_admin()));
 create policy bfb_settings_admin_update on public.bfb_settings for update to authenticated
   using ((select public.bfb_is_admin())) with check ((select public.bfb_is_admin()));
 
 -- Operatori: lettura della propria riga; gestione solo lato server (service role)
-grant select on public.bfb_admins to authenticated;
 create policy bfb_admins_self_read on public.bfb_admins for select to authenticated
   using (user_id = (select auth.uid()) or (select public.bfb_is_admin()));
 
 -- Catalogo: operatori
-grant select, insert, update on public.bfb_books, public.bfb_editions to authenticated;
 create policy bfb_books_op on public.bfb_books for all to authenticated
   using ((select public.bfb_is_operator())) with check ((select public.bfb_is_operator()));
 create policy bfb_editions_op on public.bfb_editions for all to authenticated
   using ((select public.bfb_is_operator())) with check ((select public.bfb_is_operator()));
 
 -- Recensioni: proprietario (o admin). Stato, slug e pubblicazione SOLO via RPC.
-grant select, insert, delete on public.bfb_reviews to authenticated;
-grant update (book_id, edition_id, body, spoiler_body, has_spoilers, excerpt, rating, tags,
-  placeholder_ok, private_notes) on public.bfb_reviews to authenticated;
 create policy bfb_reviews_select on public.bfb_reviews for select to authenticated
   using ((select public.bfb_is_operator()) and (owner_id = (select auth.uid()) or (select public.bfb_is_admin())));
 create policy bfb_reviews_insert on public.bfb_reviews for insert to authenticated
@@ -388,34 +370,35 @@ create policy bfb_reviews_insert on public.bfb_reviews for insert to authenticat
 create policy bfb_reviews_update on public.bfb_reviews for update to authenticated
   using ((select public.bfb_is_operator()) and (owner_id = (select auth.uid()) or (select public.bfb_is_admin())))
   with check ((select public.bfb_is_operator()) and (owner_id = (select auth.uid()) or (select public.bfb_is_admin())));
-create policy bfb_reviews_delete on public.bfb_reviews for delete to authenticated
+create policy bfb_reviews_remove on public.bfb_reviews for delete to authenticated
   using ((select public.bfb_is_operator()) and (owner_id = (select auth.uid()) or (select public.bfb_is_admin()))
     and state <> 'published');
 
 -- Revisioni: lettura per chi vede la recensione; scrittura solo via RPC
-grant select on public.bfb_review_revisions to authenticated;
 create policy bfb_revisions_select on public.bfb_review_revisions for select to authenticated
   using (exists (select 1 from public.bfb_reviews r where r.id = review_id
     and (select public.bfb_is_operator()) and (r.owner_id = (select auth.uid()) or (select public.bfb_is_admin()))));
 
 -- Proposte AI
-grant select, insert on public.bfb_ai_suggestions to authenticated;
-grant update (status, decided_at) on public.bfb_ai_suggestions to authenticated;
-create policy bfb_ai_suggestions_rw on public.bfb_ai_suggestions for all to authenticated
+create policy bfb_ai_suggestions_select on public.bfb_ai_suggestions for select to authenticated
+  using (exists (select 1 from public.bfb_reviews r where r.id = review_id
+    and (select public.bfb_is_operator()) and (r.owner_id = (select auth.uid()) or (select public.bfb_is_admin()))));
+create policy bfb_ai_suggestions_insert on public.bfb_ai_suggestions for insert to authenticated
+  with check (exists (select 1 from public.bfb_reviews r where r.id = review_id
+    and (select public.bfb_is_operator()) and (r.owner_id = (select auth.uid()) or (select public.bfb_is_admin()))));
+create policy bfb_ai_suggestions_update on public.bfb_ai_suggestions for update to authenticated
   using (exists (select 1 from public.bfb_reviews r where r.id = review_id
     and (select public.bfb_is_operator()) and (r.owner_id = (select auth.uid()) or (select public.bfb_is_admin()))))
   with check (exists (select 1 from public.bfb_reviews r where r.id = review_id
     and (select public.bfb_is_operator()) and (r.owner_id = (select auth.uid()) or (select public.bfb_is_admin()))));
 
 -- Consumi AI
-grant select, insert on public.bfb_ai_usage to authenticated;
 create policy bfb_ai_usage_select on public.bfb_ai_usage for select to authenticated
   using ((select public.bfb_is_operator()));
 create policy bfb_ai_usage_insert on public.bfb_ai_usage for insert to authenticated
   with check ((select public.bfb_is_operator()) and user_id = (select auth.uid()));
 
 -- Audit: lettura admin; scrittura operatori a proprio nome
-grant select, insert on public.bfb_audit_events to authenticated;
 create policy bfb_audit_select on public.bfb_audit_events for select to authenticated
   using ((select public.bfb_is_admin()));
 create policy bfb_audit_insert on public.bfb_audit_events for insert to authenticated

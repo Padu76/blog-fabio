@@ -28,7 +28,6 @@ begin
   end if;
   return r;
 end $$;
-revoke all on function public.bfb_assert_can_edit(uuid) from public, anon, authenticated;
 
 create or replace function public.bfb_publish_review(
   p_review_id uuid,
@@ -154,42 +153,6 @@ begin
     'slug', v_slug, 'url', '/recensioni/' || v_slug, 'revision_number', v_rev_no, 'repeated', false);
 end $$;
 
-create or replace function public.bfb_unpublish_review(p_review_id uuid)
-returns jsonb language plpgsql security definer set search_path = '' as $$
-declare
-  r public.bfb_reviews;
-begin
-  r := public.bfb_assert_can_edit(p_review_id);
-  delete from public.bfb_public_reviews where review_id = r.id;
-  update public.bfb_reviews set state = 'draft', published_revision_id = null, published_at = null,
-    last_publish_key = null
-  where id = r.id;
-  insert into public.bfb_audit_events (actor_id, action, target_type, target_id, metadata)
-  values (auth.uid(), 'review.unpublish', 'review', r.id::text, jsonb_build_object('slug', r.slug));
-  return jsonb_build_object('review_id', r.id, 'state', 'draft', 'slug', r.slug);
-end $$;
-
-create or replace function public.bfb_archive_review(p_review_id uuid, p_archive boolean default true)
-returns jsonb language plpgsql security definer set search_path = '' as $$
-declare
-  r public.bfb_reviews;
-begin
-  r := public.bfb_assert_can_edit(p_review_id);
-  if p_archive then
-    delete from public.bfb_public_reviews where review_id = r.id;
-    update public.bfb_reviews set state = 'archived', archived_at = now(), published_revision_id = null,
-      published_at = null, last_publish_key = null
-    where id = r.id;
-  else
-    update public.bfb_reviews set state = 'draft', archived_at = null where id = r.id;
-  end if;
-  insert into public.bfb_audit_events (actor_id, action, target_type, target_id, metadata)
-  values (auth.uid(), case when p_archive then 'review.archive' else 'review.unarchive' end,
-    'review', r.id::text, '{}'::jsonb);
-  return jsonb_build_object('review_id', r.id, 'state', case when p_archive then 'archived' else 'draft' end,
-    'slug', r.slug);
-end $$;
-
 -- Snapshot della revisione di lavoro (es. testo dettato prima di accettare la correzione AI)
 create or replace function public.bfb_snapshot_review(p_review_id uuid, p_note text)
 returns uuid language plpgsql security definer set search_path = '' as $$
@@ -208,11 +171,3 @@ begin
   return v_id;
 end $$;
 
-revoke all on function public.bfb_publish_review(uuid, int, boolean, text) from public, anon;
-revoke all on function public.bfb_unpublish_review(uuid) from public, anon;
-revoke all on function public.bfb_archive_review(uuid, boolean) from public, anon;
-revoke all on function public.bfb_snapshot_review(uuid, text) from public, anon;
-grant execute on function public.bfb_publish_review(uuid, int, boolean, text) to authenticated;
-grant execute on function public.bfb_unpublish_review(uuid) to authenticated;
-grant execute on function public.bfb_archive_review(uuid, boolean) to authenticated;
-grant execute on function public.bfb_snapshot_review(uuid, text) to authenticated;
