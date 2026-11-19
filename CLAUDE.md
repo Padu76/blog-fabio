@@ -18,7 +18,7 @@ Nome sito provvisorio: "Lo scaffale di Fabio". Deve essere modificabile dal pann
   - Il risultato è una **proposta** affiancata al testo originale (confronto/diff), Fabio accetta o scarta. Il testo originale resta salvato nella cronologia revisioni.
   - Se la Claude API è giù, lenta o la chiave manca: messaggio chiaro e Fabio continua a scrivere e pubblicare normalmente. L'AI non deve mai bloccare il flusso.
   - Chiamata sincrona dalla route server con timeout. Niente job queue, niente worker, niente cron.
-  - Limite anti-spreco: la route è solo admin, ha un rate limit per utente e un tetto giornaliero di chiamate configurabile dal pannello (`AI_DAILY_LIMIT` come default). Registra in `bf_ai_usage` le chiamate e i token, e mostra il consumo del mese nel pannello.
+  - Limite anti-spreco: la route è solo admin, ha un rate limit per utente e un tetto giornaliero di chiamate configurabile dal pannello (`AI_DAILY_LIMIT` come default). Registra in `bfb_ai_usage` le chiamate e i token, e mostra il consumo del mese nel pannello.
 - Niente funzioni pubbliche AI (consiglio in linguaggio naturale ecc.): sono P1 e restano spente.
 - **Trascrizione audio (Whisper/OpenAI) = funzione futura, flag `FEATURE_AUDIO=false`.** Non costruire registratore e upload adesso. Lascia solo predisposto un adapter `src/server/ai/transcription.ts` con interfaccia chiara, così si può attivare in seguito con `OPENAI_API_KEY`. Nota: `whisper-1` è deprecato da OpenAI (dismissione 26 febbraio 2027); quando si attiverà, usare il modello di trascrizione OpenAI in vigore in quel momento, verificandolo sulla documentazione.
 
@@ -50,10 +50,10 @@ Milestone (adattate dal capitolato sez. 20): 1 Fondazioni → 2 Libro e recensio
 
 ## Supabase condiviso: regole obbligatorie
 
-- Tutte le tabelle con prefisso **`bf_`** (es. `bf_books`, `bf_editions`, `bf_reviews`, `bf_review_revisions`, `bf_ai_suggestions`, `bf_ai_usage`, `bf_settings`, `bf_admins`, `bf_audit_events`, `bf_catalog_cache`). Funzioni, trigger e policy con prefisso `bf_`.
-- Bucket storage: `bf-covers` (pubblico, solo immagini validate) e `bf-media` (pubblico, hero e foto bio). Nessun bucket audio.
-- `auth.users` è condiviso con altri progetti: **essere autenticati NON significa essere admin**. L'accesso all'admin passa dalla tabella `bf_admins` (user_id + ruolo). RLS e controlli server la usano sempre.
-- RLS attiva su ogni tabella `bf_`. Il pubblico legge solo le revisioni pubblicate (niente bozze, niente testo originale pre-correzione, niente note private). Verifica le policy con utenti di prova reali (anonimo, autenticato non admin, admin), non solo che esistano nel SQL.
+- Tutte le tabelle con prefisso **`bfb_`** (es. `bfb_books`, `bfb_editions`, `bfb_reviews`, `bfb_review_revisions`, `bfb_ai_suggestions`, `bfb_ai_usage`, `bfb_settings`, `bfb_admins`, `bfb_audit_events`, `bfb_catalog_cache`). Funzioni, trigger e policy con prefisso `bfb_`. **Attenzione: il prefisso `bf_` (senza la seconda b) appartiene a un altro progetto sulla stessa istanza: non usarlo e non toccarne le tabelle.**
+- Bucket storage: `bfb-covers` (pubblico, solo immagini validate) e `bfb-media` (pubblico, hero e foto bio). Nessun bucket audio.
+- `auth.users` è condiviso con altri progetti: **essere autenticati NON significa essere admin**. L'accesso all'admin passa dalla tabella `bfb_admins` (user_id + ruolo). RLS e controlli server la usano sempre.
+- RLS attiva su ogni tabella `bfb_`. Il pubblico legge solo le revisioni pubblicate (niente bozze, niente testo originale pre-correzione, niente note private). Verifica le policy con utenti di prova reali (anonimo, autenticato non admin, admin), non solo che esistano nel SQL.
 - Migrazioni in `supabase/migrations/` applicate tramite MCP Supabase. Non toccare tabelle di altri progetti.
 - Dopo pubblicazione/ritiro invalida la cache delle pagine pubbliche (`revalidatePath` / `revalidateTag`).
 
@@ -112,7 +112,7 @@ Vedi `.env.local` (template). In locale stanno lì; in Vercel le inserisce Andre
 
 ## Admin di Fabio
 
-Utente admin creato con Supabase Auth (email di Fabio, la fornisce Andrea) + riga in `bf_admins`. Prevedi una procedura semplice da pannello, senza SQL editor. Login consigliato: magic link via email (nessuna password da ricordare sul telefono); conferma con Andrea.
+Utente admin creato con Supabase Auth (email di Fabio, la fornisce Andrea) + riga in `bfb_admins`. Prevedi una procedura semplice da pannello, senza SQL editor. Login consigliato: magic link via email (nessuna password da ricordare sul telefono); conferma con Andrea.
 
 ## Consegna
 
