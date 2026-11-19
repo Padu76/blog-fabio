@@ -35,8 +35,9 @@ export const DEFAULT_SITE: SiteSettings = {
   description: 'Recensioni e consigli di lettura di Fabio.',
   hero_title: 'Ogni libro ha una storia. Trova la tua.',
   hero_subtitle: 'Letture, pensieri e consigli di Fabio.',
-  hero_image_url: null,
-  hero_image_credit: null,
+  // foto iniziale (licenza Unsplash, link diretto come da linee guida): sostituibile dal pannello
+  hero_image_url: 'https://images.unsplash.com/photo-1513680592398-887abb03c760?ixlib=rb-4.1.0&q=80&fm=jpg&crop=entropy&cs=srgb&w=1800',
+  hero_image_credit: 'Foto: Jade Stephens su Unsplash (licenza Unsplash)',
   bio_title: 'Chi sono',
   bio_text: '',
   bio_photo_url: null,
