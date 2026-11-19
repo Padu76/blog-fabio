@@ -25,10 +25,11 @@ export function SettingsForms({
   const [saving, setSaving] = useState(false);
   const [newOp, setNewOp] = useState({ email: '', role: 'admin', display_name: '' });
   const [issued, setIssued] = useState<{ email: string; password: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   async function newPassword(o: Op) {
     if (!window.confirm(`Creare una nuova password per ${o.email}? Quella di prima smette di funzionare.`)) return;
-    setMsg(null); setIssued(null);
+    setMsg(null); setIssued(null); setCopied(false);
     try {
       const r = await api<{ password: string }>('/api/admin/operators', { method: 'POST', json: { action: 'set_password', user_id: o.user_id } });
       setIssued({ email: o.email, password: r.password });
@@ -190,7 +191,24 @@ export function SettingsForms({
         {issued && (
           <div role="status" className="rounded-lg border border-accent-strong bg-accent-soft p-3 text-ink">
             <p className="text-sm">Nuova password per <strong>{issued.email}</strong>. Copiala adesso: non verrà più mostrata.</p>
-            <p className="mt-2 select-all break-all font-mono text-xl">{issued.password}</p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input
+                readOnly value={issued.password} aria-label="Nuova password"
+                onFocus={(e) => e.currentTarget.select()} onClick={(e) => e.currentTarget.select()}
+                className="min-w-0 flex-1 rounded-lg border border-accent-strong bg-surface px-3 py-2.5 font-mono text-xl text-ink"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  void navigator.clipboard.writeText(issued.password)
+                    .then(() => setCopied(true))
+                    .catch(() => setMsg({ kind: 'err', text: 'Copia non riuscita: seleziona la password e copiala a mano.' }));
+                }}
+                className="rounded-lg bg-accent-strong px-5 py-2.5 font-medium text-white"
+              >
+                {copied ? 'Copiata ✓' : 'Copia'}
+              </button>
+            </div>
             <p className="mt-2 text-sm text-muted">Una volta entrato, può cambiarla da “Il mio accesso”.</p>
           </div>
         )}
