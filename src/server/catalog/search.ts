@@ -162,13 +162,15 @@ export async function verifyCover(url: string | null): Promise<boolean> {
   try {
     return await withTimeout(async (signal) => {
       let current = u;
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 4; i++) {
         const res = await fetch(current, { method: 'GET', redirect: 'manual', signal, cache: 'no-store' });
         if (res.status >= 300 && res.status < 400) {
           const loc = res.headers.get('location');
           if (!loc) return false;
           const next = new URL(loc, current);
-          if (next.protocol !== 'https:' || !ALLOWED_COVER_HOSTS.has(next.hostname) && !next.hostname.endsWith('.archive.org')) return false;
+          // Open Library rimanda ad archive.org e poi a un suo server (iaXXXX.us.archive.org)
+          const onArchive = next.hostname === 'archive.org' || next.hostname.endsWith('.archive.org');
+          if (next.protocol !== 'https:' || (!ALLOWED_COVER_HOSTS.has(next.hostname) && !onArchive)) return false;
           current = next;
           continue;
         }
