@@ -16,7 +16,10 @@ const schema = z.object({
 function checkMediaUrl(url: string | null) {
   if (!url) return;
   const allowed = `${publicEnv.supabaseUrl}/storage/v1/object/public/bfb-media/`;
-  if (!url.startsWith(allowed)) throw new AppError('VALIDATION_ERROR', 'Le immagini vanno caricate dal pannello.');
+  // ammessa anche la foto hero iniziale da Unsplash (licenza Unsplash, link diretto come da linee guida)
+  if (!url.startsWith(allowed) && !url.startsWith('https://images.unsplash.com/')) {
+    throw new AppError('VALIDATION_ERROR', 'Le immagini vanno caricate dal pannello.');
+  }
 }
 
 export async function POST(req: Request) {
