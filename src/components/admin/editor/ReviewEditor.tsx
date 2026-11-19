@@ -14,6 +14,7 @@ import { BookPicker } from './BookPicker';
 import { RatingPicker } from './RatingPicker';
 import { AiSuggestion } from './AiSuggestion';
 import { History } from './History';
+import { DictateButton, appendDictated } from './DictateButton';
 
 const STATUS_TEXT: Record<SaveStatus, string> = {
   saved: 'Salvato', dirty: 'Modifiche…', saving: 'Salvataggio…', offline: 'Connessione assente: salvato sul telefono',
@@ -68,6 +69,11 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
       removeLocalDraft(initial.id);
     }
   }, [initial.id, initial.updated_at, initial.fields, loadSide]);
+
+  // testo dettato: si aggiunge in fondo alla recensione
+  function onDictated(spoken: string) {
+    update('body', appendDictated(fieldsRef.current.body, spoken));
+  }
 
   function update<K extends keyof WorkingFields>(k: K, v: WorkingFields[K]) {
     const next = { ...fieldsRef.current, [k]: v };
@@ -311,7 +317,7 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
           <ul className="mt-1 list-disc pl-5">
             <li>Cosa ti ha colpito?</li><li>A chi lo consiglieresti?</li><li>Cosa non ti ha convinto?</li>
           </ul>
-          <p className="mt-1">Per dettare: tocca il microfono sulla tastiera del telefono. Puoi dire “virgola”, “punto”, “a capo”.</p>
+          <p className="mt-1">Per dettare: premi “Detta” e parla, il testo si aggiunge in fondo. In alternativa usa il microfono sulla tastiera del telefono. La punteggiatura la sistema poi “Sistema il testo”.</p>
         </details>
 
         <div className={focusMode ? 'fixed inset-0 z-50 flex flex-col bg-bg p-3' : 'mt-3'}>
@@ -319,7 +325,9 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
             <div className="mb-2 flex items-center gap-2">
               {statusPill}
               <span className="text-xs text-muted">{fields.body.trim() ? fields.body.trim().split(/\s+/).length : 0} parole</span>
-              <button type="button" onClick={() => setFocusMode(false)} className="ml-auto rounded-md bg-accent-strong px-4 py-2 text-white">Fine</button>
+              <span className="ml-auto" />
+              <DictateButton onText={onDictated} />
+              <button type="button" onClick={() => setFocusMode(false)} className="rounded-md border border-accent-strong px-4 py-2 text-accent-strong">Fine</button>
             </div>
           ) : null}
           <label htmlFor="body" className={focusMode ? 'sr-only' : 'sr-only'}>Testo della recensione</label>
@@ -336,6 +344,7 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
         </div>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
+          {!focusMode && <DictateButton onText={onDictated} />}
           <button type="button" onClick={() => setFocusMode(true)} className="rounded-md border border-line px-3 py-2 text-ink">Scrivi a tutto schermo</button>
           <button type="button" disabled={aiBusy || fields.body.trim().length < 20} onClick={() => void askAi('body')}
             className="rounded-md border border-accent bg-accent-soft px-3 py-2 font-medium text-accent-strong disabled:opacity-50">
@@ -343,7 +352,7 @@ export function ReviewEditor({ initial }: { initial: EditorState }) {
           </button>
           <span className="text-xs text-muted">{fields.body.trim() ? fields.body.trim().split(/\s+/).length : 0} parole</span>
         </div>
-        <p className="mt-1 text-xs text-muted">“Sistema il testo” corregge solo punteggiatura, maiuscole e parole capite male: ti mostra le differenze e decidi tu.</p>
+        <p className="mt-1 text-xs text-muted">“Detta” scrive quello che dici, senza punteggiatura. “Sistema il testo” corregge solo punteggiatura, maiuscole e parole capite male: ti mostra le differenze e decidi tu.</p>
 
         {suggestions.filter((s) => s.field === 'body').map((s) => (
           <div key={s.id} className="mt-4"><AiSuggestion s={s} busy={aiBusy} onAccept={() => void decide(s, 'accept')} onDiscard={() => void decide(s, 'discard')} /></div>

@@ -26,14 +26,13 @@ function readablePassword() {
 }
 
 async function findUserIdByEmail(svc: ReturnType<typeof createServiceClient>, email: string) {
-  for (let page = 1; page <= 20; page++) {
-    const { data, error } = await svc.auth.admin.listUsers({ page, perPage: 200 });
-    if (error) throw new AppError('INTERNAL', 'Elenco utenti non disponibile.', true);
-    const u = data.users.find((x) => x.email?.toLowerCase() === email);
-    if (u) return u.id;
-    if (data.users.length < 200) return null;
+  // una sola riga letta dal database: l'elenco completo degli utenti dell'istanza condivisa non serve (e può fallire)
+  const { data, error } = await svc.rpc('bfb_find_user_id', { p_email: email });
+  if (error) {
+    console.error('ricerca utente', error.code, error.message);
+    throw new AppError('INTERNAL', 'Ricerca dell’utente non riuscita. Riprova tra poco.', true);
   }
-  return null;
+  return (data as string | null) ?? null;
 }
 
 export async function POST(req: Request) {
@@ -76,7 +75,10 @@ export async function POST(req: Request) {
     let userId = await findUserIdByEmail(svc, email);
     if (!userId) {
       const { data, error } = await svc.auth.admin.createUser({ email, email_confirm: true });
-      if (error || !data.user) throw new AppError('INTERNAL', 'Creazione dell’utente non riuscita.', true);
+      if (error || !data.user) {
+        console.error('creazione utente', error?.status, error?.message);
+        throw new AppError('INTERNAL', 'Creazione dell’utente non riuscita.', true);
+      }
       userId = data.user.id;
     }
     const { error } = await svc.from('bfb_admins').upsert({
