@@ -19,6 +19,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             <Link href="/" className="rounded px-2 py-2 text-ink hover:bg-surface">Vedi il sito</Link>
             <Link href="/admin/accesso" className="whitespace-nowrap rounded px-2 py-2 text-ink hover:bg-surface">Il mio accesso</Link>
           </nav>
+          <span className="hidden max-w-[16rem] truncate text-sm text-muted sm:inline" title={op.email}>
+            {op.displayName ? `${op.displayName} · ${op.email}` : op.email}
+          </span>
           <SignOutButton />
         </div>
       </header>

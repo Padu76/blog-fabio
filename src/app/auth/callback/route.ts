@@ -26,5 +26,11 @@ export async function GET(req: Request) {
       });
     }
   }
-  return NextResponse.redirect(`${base}/admin`);
+  // auth.users è condiviso e Google lascia entrare chiunque: resta dentro solo chi è operatore attivo del blog
+  const { data: op } = await supabase.from('bfb_admins').select('active').eq('user_id', data.user.id).maybeSingle();
+  if (!op?.active) {
+    await supabase.auth.signOut();
+    return NextResponse.redirect(`${base}/admin/login?e=forbidden`);
+  }
+  return NextResponse.redirect(`${base}/`);
 }

@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { api, ApiFailure } from '@/lib/api';
 import { clearLocalDrafts } from '@/components/admin/localDraft';
+import { createBrowserSupabase } from '@/lib/supabase/browser';
 
 export function LoginForm({ signedIn }: { signedIn: boolean }) {
   const [email, setEmail] = useState('');
@@ -23,6 +24,15 @@ export function LoginForm({ signedIn }: { signedIn: boolean }) {
       setMsg({ kind: 'err', text: err instanceof ApiFailure ? err.error.message : 'Errore inatteso.' });
       setState('idle');
     }
+  }
+
+  async function google() {
+    setState('sending'); setMsg(null);
+    const { error } = await createBrowserSupabase().auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback`, queryParams: { prompt: 'select_account' } },
+    });
+    if (error) { setMsg({ kind: 'err', text: 'Accesso con Google non riuscito. Riprova.' }); setState('idle'); }
   }
 
   async function sendLink() {
@@ -46,7 +56,18 @@ export function LoginForm({ signedIn }: { signedIn: boolean }) {
   const field = 'rounded-lg border border-line bg-surface px-4 py-3 text-lg text-ink';
   return (
     <>
-      <form onSubmit={submit} className="mt-6 flex flex-col gap-3">
+      <button type="button" onClick={() => void google()} disabled={state === 'sending'}
+        className="mt-6 flex w-full items-center justify-center gap-3 rounded-lg border border-line bg-surface px-4 py-3.5 text-lg font-medium text-ink shadow-sm hover:border-accent-strong disabled:opacity-60">
+        <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden="true">
+          <path fill="#4285F4" d="M22.5 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.2-4.8 3.2-8z" />
+          <path fill="#34A853" d="M12 23c2.9 0 5.4-1 7.3-2.8l-3.6-2.7c-1 .7-2.3 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z" />
+          <path fill="#FBBC05" d="M5.800 14.100a6.600 6.600 0 0 1 0-4.200V7.100H2.100a11 11 0 0 0 0 9.800l3.700-2.800z" />
+          <path fill="#EA4335" d="M12 5.400c1.600 0 3 .6 4.200 1.600l3.100-3.100A11 11 0 0 0 2.100 7.100l3.700 2.800c.9-2.600 3.300-4.500 6.200-4.500z" />
+        </svg>
+        Entra con Google
+      </button>
+      <p className="mt-6 text-center text-sm text-muted">oppure con la password</p>
+      <form onSubmit={submit} className="mt-2 flex flex-col gap-3">
         <label htmlFor="password" className="text-sm font-medium text-ink">Password</label>
         <input
           id="password" type={show ? 'text' : 'password'} required autoComplete="current-password" value={password}

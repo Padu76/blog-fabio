@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-type Me = { operator: boolean; isAdmin?: boolean; reviewId?: string | null; preview?: boolean };
+type Me = { operator: boolean; isAdmin?: boolean; reviewId?: string | null; preview?: boolean; name?: string | null; email?: string };
 
 export function OperatorBar() {
   const pathname = usePathname();
@@ -31,9 +31,9 @@ export function OperatorBar() {
     <div className="sticky top-0 z-40 border-b border-ink/20 bg-ink text-[#FBF6EC]">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 sm:px-6">
         <p className="mr-auto text-sm">
-          {me.preview
-            ? <>Sito <strong>in anteprima</strong>: per ora lo vedi solo tu.</>
-            : <>Sei nell’area riservata.</>}
+          <strong>{me.name || me.email}</strong>
+          {me.name && me.email ? <span className="hidden text-[#FBF6EC]/70 sm:inline"> · {me.email}</span> : null}
+          <span className="text-[#FBF6EC]/80"> — {me.preview ? 'sito in anteprima, lo vede solo chi è entrato' : 'sei nell’area riservata'}</span>
         </p>
         {me.reviewId && (
           <Link href={`/admin/recensioni/${me.reviewId}`} className={ghost}>Modifica questa recensione</Link>

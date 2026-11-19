@@ -22,6 +22,7 @@ export async function GET(req: Request) {
     const { site } = await getPublicSettings();
     return NextResponse.json({
       operator: true, isAdmin: operator.role === 'admin', reviewId, preview: site.preview_mode,
+      name: operator.displayName, email: operator.email,
     });
   } catch {
     return NextResponse.json({ operator: false });
